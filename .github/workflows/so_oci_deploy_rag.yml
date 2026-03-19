@@ -1,0 +1,104 @@
+# GitHub Actions CI/CD pipeline for the Songhay IT Glossary RAG app.
+name: RAG CI/CD to OCI VM
+run-name: ${{ github.actor }} triggered CI/CD 🚀
+on:
+  push:
+    branches:
+      - '**' # Trigger on all branches, but deploy only from main
+
+jobs:
+  # ---------------------------------------------------------
+  # Job 1 — Build & Test
+  # ---------------------------------------------------------
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: flake8
+
+      - name: Run tests
+        run: pytest
+
+  # ---------------------------------------------------------
+  # Job 2 — Deploy to OCI VM (main branch only)
+  # ---------------------------------------------------------
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.OCI_VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.OCI_VM_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Sync files to VM
+        env:
+          HOST: ${{ secrets.OCI_VM_HOST }}
+          USER: ${{ secrets.OCI_VM_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='.env' \
+            --exclude='venv' \
+            ./ ${USER}@${HOST}:/srv/rag_demo/
+
+      - name: Deploy on VM
+        env:
+          HOST: ${{ secrets.OCI_VM_HOST }}
+          USER: ${{ secrets.OCI_VM_USER }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_VERSION: ${{ secrets.AZURE_OPENAI_API_VERSION }}
+          AZURE_DEPLOYMENT_NAME: ${{ secrets.AZURE_DEPLOYMENT_NAME }}
+          AZURE_EMBEDDING_DEPLOYMENT: ${{ secrets.AZURE_EMBEDDING_DEPLOYMENT }}
+          PG_CONNECTION_STRING: ${{ secrets.PG_CONNECTION_STRING }}
+          GLOSSARY_DATA_PATH: ${{ secrets.GLOSSARY_DATA_PATH }}
+        run: |
+          ssh ${USER}@${HOST} << EOF
+          set -e
+
+          cd /srv/rag_demo
+
+          # Create venv if first deploy
+          if [ ! -d "venv" ]; then
+            python3 -m venv venv
+          fi
+          source venv/bin/activate
+
+          # Write .env from secrets
+          cat > .env << EOT
+          AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+          AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+          AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+          AZURE_DEPLOYMENT_NAME=${AZURE_DEPLOYMENT_NAME}
+          AZURE_EMBEDDING_DEPLOYMENT=${AZURE_EMBEDDING_DEPLOYMENT}
+          PG_CONNECTION_STRING=${PG_CONNECTION_STRING}
+          GLOSSARY_DATA_PATH=${GLOSSARY_DATA_PATH}
+          EOT
+
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+          sudo systemctl restart glossary
+          EOF

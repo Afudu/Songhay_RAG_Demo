@@ -15,13 +15,13 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-AZURE_OPENAI_API_KEY = config("AZURE_OPENAI_API_KEY")
-AZURE_OPENAI_ENDPOINT = config("AZURE_OPENAI_ENDPOINT")
+AZURE_OPENAI_API_KEY = config("AZURE_OPENAI_API_KEY", default="")
+AZURE_OPENAI_ENDPOINT = config("AZURE_OPENAI_ENDPOINT", default="", cast=str)
 AZURE_OPENAI_API_VERSION = config("AZURE_OPENAI_API_VERSION", default="2024-02-01")
 AZURE_DEPLOYMENT_NAME = config("AZURE_DEPLOYMENT_NAME", default="gpt-4o")
 AZURE_EMBEDDING_DEPLOYMENT = config("AZURE_EMBEDDING_DEPLOYMENT", default="text-embedding-ada-002")
-PG_CONNECTION_STRING = config("PG_CONNECTION_STRING")
-GLOSSARY_DATA_PATH = config("GLOSSARY_DATA_PATH")
+PG_CONNECTION_STRING = config("PG_CONNECTION_STRING", default="")
+GLOSSARY_DATA_PATH = config("GLOSSARY_DATA_PATH", default="songhay_it_glossary.xlsx")
 
 COLLECTION_NAME = "songhay_it_glossary"
 
