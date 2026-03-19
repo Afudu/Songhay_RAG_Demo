@@ -16,7 +16,7 @@ from langchain_core.prompts import PromptTemplate
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 AZURE_OPENAI_API_KEY = config("AZURE_OPENAI_API_KEY", default="")
-AZURE_OPENAI_ENDPOINT = config("AZURE_OPENAI_ENDPOINT", default="", cast=str)  # ensure it's a string even if empty
+AZURE_OPENAI_ENDPOINT = config("AZURE_OPENAI_ENDPOINT", default="", cast=str)
 AZURE_OPENAI_API_VERSION = config("AZURE_OPENAI_API_VERSION", default="2024-02-01")
 AZURE_DEPLOYMENT_NAME = config("AZURE_DEPLOYMENT_NAME", default="gpt-4o")
 AZURE_EMBEDDING_DEPLOYMENT = config("AZURE_EMBEDDING_DEPLOYMENT", default="text-embedding-ada-002")
