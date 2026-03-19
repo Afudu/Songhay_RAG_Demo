@@ -110,5 +110,4 @@ Add all .env variables as GitHub Secrets.
 
 ### Live Application
 
-- The app is live at:
-  http://<your-oci-instance-ip>:8501
+- The app is live at: http://92.5.67.11/glossary/
