@@ -14,7 +14,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 
-
 # ── Configuration ─────────────────────────────────────────────────────────────
 AZURE_OPENAI_API_KEY = config("AZURE_OPENAI_API_KEY")
 AZURE_OPENAI_ENDPOINT = config("AZURE_OPENAI_ENDPOINT")
@@ -55,26 +54,18 @@ def load_excel_as_documents(path: str) -> list[Document]:
     Each row becomes one document: one entry, one chunk, clean retrieval.
     """
     df = pd.read_excel(path, engine="openpyxl")
-    df.columns = df.columns.str.strip()
 
-    # Map the three expected column names
-    col_map = {}
-    for col in df.columns:
-        lower = col.lower()
-        if lower == "english":
-            col_map["en"] = col
-        elif lower == "french":
-            col_map["fr"] = col
-        elif lower == "songhay":
-            col_map["so"] = col
+    if df.empty:
+        return []
+
+    df.columns = df.columns.str.strip()
 
     documents = []
     for _, row in df.iterrows():
-        en = str(row.get(col_map.get("en", ""), "")).strip()
-        fr = str(row.get(col_map.get("fr", ""), "")).strip()
-        so = str(row.get(col_map.get("so", ""), "")).strip()
+        en = str(row.get("English", "")).strip()
+        fr = str(row.get("French", "")).strip()
+        so = str(row.get("Songhay", "")).strip()
 
-        # Skip empty cells or accidental header rows
         if is_empty(en) or en.lower() == "english":
             continue
         if is_empty(fr) or fr.lower() == "french":
@@ -82,7 +73,6 @@ def load_excel_as_documents(path: str) -> list[Document]:
         if is_empty(so) or so.lower() == "songhay":
             continue
 
-        # One clean trilingual block per entry
         content = f"English: {en}\nFrench: {fr}\nSonghay: {so}"
         documents.append(Document(
             page_content=content,
@@ -159,7 +149,7 @@ def main():
     st.set_page_config(page_title="Songhay IT Glossary", page_icon="📖", layout="centered")
 
     st.title("Songhay IT Glossary — RAG Demo")
-    st.caption("Trilingual IT terminology: English · French · Songhay  |  LangChain + Azure OpenAI + pgvector")
+    st.caption("Trilingual IT terminology: English · French · Songhay")
     st.divider()
 
     vectorstore = load_vectorstore()
