@@ -146,7 +146,8 @@ def build_qa_chain(vectorstore):
 # ── Streamlit UI ───────────────────────────────────────────────────────────────
 
 def main():
-    st.set_page_config(page_title="Songhay IT Glossary", page_icon="📖", layout="centered")
+    st.set_page_config(page_title="Songhay IT Glossary",
+                       page_icon="img/son_favicon.ico", layout="centered")
 
     st.title("Songhay IT Glossary — RAG Demo")
     st.caption("Trilingual IT terminology: English · French · Songhay")
