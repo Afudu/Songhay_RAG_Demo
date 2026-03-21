@@ -61,17 +61,7 @@ Place `it_maanatiira.xlsx` in the project folder.
 Expected columns: English, Francais (or Français), Sonay (or Soŋay / Songhay)
 
 ### Configure environment (python-decouple)
-Place .env in the project folder with the following variables:
-
-| Variable                   | Description                     | Default                |
-|----------------------------|---------------------------------|------------------------|
-| AZURE_OPENAI_API_KEY       | Your Azure OpenAI key           | required               |
-| AZURE_OPENAI_ENDPOINT      | Your resource endpoint URL      | required               |
-| AZURE_OPENAI_API_VERSION   | API version                     | 2024-02-01-preview     |
-| AZURE_DEPLOYMENT_NAME      | Chat model deployment name      | gpt-4o                 |
-| AZURE_EMBEDDING_DEPLOYMENT | Embedding model deployment name | text-embedding-ada-002 |
-| PG_CONNECTION_STRING       | PostgreSQL connection string    | required               |
-| GLOSSARY_DATA_PATH         | Path to glossary Excel file     | it_maanatiira.xlsx     |
+Create .env file in the project folder with the required variables.
 
 ### Running the application
 ```bash
@@ -92,13 +82,14 @@ To force re-index, set `pre_delete_collection=True` in app.py temporarily.
   pytest
 
 ## Deploy to OCI
-Add all .env variables as GitHub Secrets.
+
 
 ### Deployment Prerequisites
 
 - OCI instance with Python and PostgreSQL installed.
 - PostgreSQL configured with pgvector extension.
 - GitHub repository with the project code and GitHub Actions workflow set up for deployment.
+- Add all .env variables as GitHub Secrets.
 
 ### Steps to Deploy
 1. Push changes to the main branch.
@@ -106,8 +97,7 @@ Add all .env variables as GitHub Secrets.
    - Build and test the code.
    - Deploy to the OCI instance if tests pass.
 
-   **Note:** Changes to non-main branch only trigger the build-and-test step.
+[//]: # (### Live Application)
 
-### Live Application
-
-- The app is live at: http://92.5.67.11/glossary/
+[//]: # ()
+[//]: # (- The app is live at: http://92.5.67.11/glossary/)
